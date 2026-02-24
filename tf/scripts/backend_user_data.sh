@@ -1,17 +1,21 @@
 #!/bin/bash
-export DD_AGENT_MAJOR_VERSION=7 
-export DD_API_KEY='76cd5e07d41cec7b205a01ffbc26c5ae'
-export DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+set -e
 
 yum update -y
 yum install -y docker
+
+# Instalar y configurar el agente Datadog (EU1 - datadoghq.eu)
+export DD_AGENT_MAJOR_VERSION=7
+export DD_API_KEY="${dd_api_key}"
+export DD_SITE="${dd_site}"
+bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 
 # Iniciar el servicio de Docker
 service docker start
 
 # Descargar y descomprimir el archivo backend.zip desde S3
-aws s3 cp s3://lti-project-code-bucket/backend.zip /home/ec2-user/backend.zip
-unzip /home/ec2-user/backend.zip -d /home/ec2-user/
+aws s3 cp s3://${code_bucket}/backend.zip /home/ec2-user/backend.zip
+unzip -o /home/ec2-user/backend.zip -d /home/ec2-user/
 
 # Construir la imagen Docker para el backend
 cd /home/ec2-user/backend
